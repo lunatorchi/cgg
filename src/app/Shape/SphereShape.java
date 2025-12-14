@@ -64,7 +64,17 @@ public class SphereShape implements Shape {
 
         // surface normalized
         Vec3 normal = Vec3.normalize(Vec3.subtract(hitPoint, center));
-        Vec2 uv = new Vec2(0, 0);
+
+        // from: CGG-07a-Texturkoordinaten p. 14
+        Vec3 localPoint = Vec3.subtract(hitPoint, center);
+
+        double theta = Math.acos(localPoint.y() / radius);
+        double phi = Math.PI - Math.atan2(localPoint.z(), localPoint.x());
+        
+        double u = phi / (2.0 * Math.PI);
+        double v = 1.0 - (theta / Math.PI);
+        
+        Vec2 uv = new Vec2(u, v);
 
         // return hit
         return new Hit(t, hitPoint, normal, material, uv);
