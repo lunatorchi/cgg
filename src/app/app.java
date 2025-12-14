@@ -38,14 +38,14 @@ public class app {
   public static void main(String[] args) {
     int width = 800;
     int height = 600;
-    double alpha = 55.0;
+    double alpha = 70.0;
     Color background = new Color(0, 0, 0);
     var image = new Image(width, height);
 
     // Transform Matrix
     // Mat4x4 rotY = Mat4x4.rotate(0, 1, 0, 90);
     Mat4x4 rotX = Mat4x4.rotate(1, 0, 0, -40);
-    Mat4x4 move = Mat4x4.move(0, 1.5, 2);
+    Mat4x4 move = Mat4x4.move(0, 1.5, 3);
     Mat4x4 view = Mat4x4.multiply(move, rotX);
 
     // Creates a Camera now with view
@@ -56,19 +56,23 @@ public class app {
 
     // texture 
 
-    Mat4x4 scale = Mat4x4.scale(0.4, 0.4, 1);          // 40% size
-    Mat4x4 rotate = Mat4x4.rotate(0, 0, 1, 30);        // 30° rotation
-    Mat4x4 translate = Mat4x4.move(0.5, 0.5, 0);       // center position
+   
+    Mat4x4 rotate = Mat4x4.rotate(0, 0, 1, -30);  
     
-    Mat4x4 transform = Mat4x4.multiply(translate, Mat4x4.multiply(rotate, scale));
+    
+    Mat4x4 scale = Mat4x4.scale(5, 5, 1);
+    Mat4x4 translate = Mat4x4.move(-1.0, 0.5, 0);
+    Mat4x4 transform = Mat4x4.multiply(translate, Mat4x4.multiply(scale, rotate));
+    
 
-    Sampler transformed = new TransformSampler(imageTexture, transform);
-    Sampler clamped = new ClampSampler(transformed, Color.magenta); 
+    
+    Sampler clamped = new ClampSampler(imageTexture, Color.blue); 
+    Sampler transformed = new TransformSampler(clamped, transform);
     
     Material textureMaterial = new PhongMaterial(
-      new ConstantColor(new Color(0.1, 0.1, 0.1)),
-      clamped,
-      new ConstantColor(Color.white),
+      transformed,
+      transformed,
+      transformed,
       20.0
     );
 
