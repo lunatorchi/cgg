@@ -47,8 +47,8 @@ public class DiscShape implements Shape {
             return null; // outside of radius
         } 
 
-        double u = (dx / radius + 1.0) / 2.0;
-        double v = (dz / radius + 1.0) / 2.0;
+        double u = (dx + radius )  / (2.0 * radius);
+        double v = 1.0 - (dz + radius) / (2.0 * radius);
         Vec2 uv = new Vec2(u, v);
 
         Vec3 normal = new Vec3(0, 1, 0);

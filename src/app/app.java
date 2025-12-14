@@ -34,14 +34,14 @@ public class app {
   public static void main(String[] args) {
     int width = 800;
     int height = 600;
-    double alpha = 60.0;
-    Color background = new Color(1.0, 0.6, 0.2);
+    double alpha = 55.0;
+    Color background = new Color(0, 0, 0);
     var image = new Image(width, height);
 
     // Transform Matrix
     // Mat4x4 rotY = Mat4x4.rotate(0, 1, 0, 90);
-    Mat4x4 rotX = Mat4x4.rotate(1, 0, 0, -60);
-    Mat4x4 move = Mat4x4.move(0, 2, 2);
+    Mat4x4 rotX = Mat4x4.rotate(1, 0, 0, -40);
+    Mat4x4 move = Mat4x4.move(0.5, 1.5, 2);
     Mat4x4 view = Mat4x4.multiply(move, rotX);
 
     // Creates a Camera now with view
@@ -60,8 +60,8 @@ public class app {
 
     RectShape rect = new RectShape(
       new Vec3(0, 0, 0), // center origin
-      1.0,  // width from -0.5 to 0.5
-      1.0,  // depth from -0.5 to 0.5
+      1.5,
+      1.0,
       uvMaterial
     );
 
@@ -81,7 +81,7 @@ public class app {
 
     // BACKGROUND
     Material backgroundMaterial = new PhongMaterial(
-      new ConstantColor(new Color(0.1, 0.1, 0.15)),
+      new ConstantColor(Color.black),
       new ConstantColor(Color.black),
       new ConstantColor(Color.black),
       1.0
@@ -115,7 +115,7 @@ public class app {
     Raytracer raytracer = new Raytracer(cam, sceneObj, background);
 
     image.sample(raytracer);
-    image.writePNG("a06-rectuv");
+    image.writePNG("a07-uv-debug");
 
     // runs test method
     SphereTests.sphereTests();

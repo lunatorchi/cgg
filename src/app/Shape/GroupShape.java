@@ -71,7 +71,7 @@ public class GroupShape implements Shape {
 
         /* normalizes normal vec */
         normal_parent = Vec3.normalize(normal_parent);
-        Vec2 uv = new Vec2(0, 0);
+        Vec2 uv = closest.uv();
 
         return new Hit(
             closest.t(),    // distance to hit point
