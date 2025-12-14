@@ -10,6 +10,9 @@ import app.light.DirectionalLight;
 import app.light.Light;
 import app.material.Material;
 import app.material.PhongMaterial;
+import app.sampler.ClampSampler;
+import app.sampler.ClipSampler;
+import app.sampler.TransformSampler;
 import app.sampler.uvDebugSampler;
 import app.shape.BackgroundShape;
 import app.shape.AlienShape;
@@ -21,6 +24,7 @@ import app.tests.SphereTests;
 import cgg_tools.Color;
 import app.ConstantColor;
 import cgg_tools.ConstantColorSampler;
+import cgg_tools.ImageTexture;
 import cgg_tools.Mat4x4;
 import cgg_tools.Sampler;
 import cgg_tools.Vec3;
@@ -41,41 +45,30 @@ public class app {
     // Transform Matrix
     // Mat4x4 rotY = Mat4x4.rotate(0, 1, 0, 90);
     Mat4x4 rotX = Mat4x4.rotate(1, 0, 0, -40);
-    Mat4x4 move = Mat4x4.move(0.5, 1.5, 2);
+    Mat4x4 move = Mat4x4.move(0, 1.5, 2);
     Mat4x4 view = Mat4x4.multiply(move, rotX);
 
     // Creates a Camera now with view
     Camera cam = new Camera(alpha, width, height, view);
 
+    Sampler imageTexture = new ImageTexture("src/textures/debug_tex.png");
     // MATERIAL
 
-    // uv debug material
-    Sampler uvDebug = new uvDebugSampler();
-        Material uvMaterial = new PhongMaterial(
-            uvDebug, 
-            uvDebug,
-            uvDebug, 
-            1.0
-        );
+    // texture 
 
-    RectShape rect = new RectShape(
-      new Vec3(0, 0, 0), // center origin
-      1.5,
-      1.0,
-      uvMaterial
-    );
+    Mat4x4 scale = Mat4x4.scale(0.4, 0.4, 1);          // 40% size
+    Mat4x4 rotate = Mat4x4.rotate(0, 0, 1, 30);        // 30° rotation
+    Mat4x4 translate = Mat4x4.move(0.5, 0.5, 0);       // center position
+    
+    Mat4x4 transform = Mat4x4.multiply(translate, Mat4x4.multiply(rotate, scale));
 
-    DiscShape disc = new DiscShape(
-      new Vec3(1.3, 0, 0),
-      0.5,
-      uvMaterial
-    );
-
-    // FLOOR
-    Material floorGray = new PhongMaterial(
-      new ConstantColor(new Color(0.05, 0.05, 0.05)),
-      new ConstantColor(new Color(0.5, 0.5, 0.5)),
-      new ConstantColor(new Color(0.3, 0.3, 0.3)),
+    Sampler transformed = new TransformSampler(imageTexture, transform);
+    Sampler clamped = new ClampSampler(transformed, Color.magenta); 
+    
+    Material textureMaterial = new PhongMaterial(
+      new ConstantColor(new Color(0.1, 0.1, 0.1)),
+      clamped,
+      new ConstantColor(Color.white),
       20.0
     );
 
@@ -87,10 +80,9 @@ public class app {
       1.0
     );
 
-    GroupShape rectScene = new GroupShape(
+    GroupShape scene = new GroupShape(
       Mat4x4.identity(),
-      rect,
-      disc,
+      new RectShape(new Vec3(0, 0, 0), 3.0, 3.0, textureMaterial),
       new BackgroundShape(backgroundMaterial)
     );
 
@@ -104,18 +96,17 @@ public class app {
       new Color(0.5, 0.5, 0.5));
 
     Light light = new DirectionalLight(
-      new Vec3(0, -1, 0),  // direkt von oben nach unten
-      Color.white
-    );
+      new Vec3(0, -1, 0), // direkt von oben nach unten
+      Color.white);
 
     Color ambientLight = new Color(0.5, 0.5, 0.5);
     // Color ambientLight = new Color(0.6, 1.0, 1.0);
 
-    Scene sceneObj = new Scene(rectScene, List.of(light), ambientLight);
+    Scene sceneObj = new Scene(scene, List.of(light), ambientLight);
     Raytracer raytracer = new Raytracer(cam, sceneObj, background);
 
     image.sample(raytracer);
-    image.writePNG("a07-uv-debug");
+    image.writePNG("a07-transformed-image");
 
     // runs test method
     SphereTests.sphereTests();
