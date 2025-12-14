@@ -33,11 +33,15 @@ public record RectShape(Vec3 anchor_point, double width, double depth, Material 
         
         double halfWidth = width / 2.0;
         double halfDepth = depth / 2.0;
-        Vec2 uv = new Vec2(0, 0);
+        
 
         if (Math.abs(dx) > halfWidth || Math.abs(dz) > halfDepth) {
             return null; // outside of rectangle
         }
+
+        double u = (dx + halfWidth) / width; // from 0 to 1 in x direction
+        double v = 1.0 - (dz + halfDepth) / depth; // from 0 to 1 in z direction
+        Vec2 uv = new Vec2(u, v);
 
         Vec3 normal = new Vec3(0, 1, 0);
         return new Hit(t, hitPoint, normal, material, uv);

@@ -40,9 +40,9 @@ public class Raytracer implements Sampler {
             double face_backside = Vec3.dot(hit.normal(),to_viewer);
             /* checks if we are viewing the surface from the back if yes than its pink 
             -> important for closed shapes */
-           /*  if(debug_Backside && face_backside < 0 ){
+            if(debug_Backside && face_backside < 0 ){
                 return backside_color;
-            } */
+            }
             
             
             Material material = hit.material();
