@@ -283,7 +283,7 @@ public class Wavefront {
 		if (filename != null) {
 			var pathname = dirname + "/" + filename;
 			System.out.println("    texture: " + pathname);
-			return new ImageTexture(pathname);
+			return new ImageTexture(pathname, true);
 		} else {
 			return new ConstantColorSampler(new Color(mtlc.r, mtlc.g, mtlc.b));
 		}

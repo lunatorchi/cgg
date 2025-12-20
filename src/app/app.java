@@ -56,7 +56,7 @@ public class app {
         
     );
 
-    Sampler redATexture = new ImageTexture("src/textures/A_red.png");
+    Sampler redATexture = new ImageTexture("src/textures/A_red.png",true);
 
     // Material
     Material checkerboardMaterial = new PhongMaterial(
@@ -111,10 +111,10 @@ public class app {
     Scene sceneObj = new Scene(scene, List.of(light), ambientLight);
     Raytracer raytracer = new Raytracer(cam, sceneObj, background);
 
-    image.sample(raytracer);
-    image.writePNG("a08-no-antialiasing");
+    image.sample(new StratifiedSampler(raytracer, 16, width, height));
+    image.writePNG("a08-gamma");
 
-    //Grid Sampling
+   /*  //Grid Sampling
     var gridSampler4 = new GridSampler(raytracer, 16, width, height);
     image.sample(gridSampler4);
     image.writePNG("a08-grid-16x16");
@@ -123,7 +123,7 @@ public class app {
     var stratSampler4 = new StratifiedSampler(raytracer, 16, width, height);
     image.sample(stratSampler4);
     image.writePNG("a08-stratified-16x16");
-
+ */
 
     // runs test method
     SphereTests.sphereTests();
