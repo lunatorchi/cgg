@@ -1,5 +1,9 @@
-package app;
+package app.sampler;
 
+import app.Camera;
+import app.Hit;
+import app.Ray;
+import app.Scene;
 import app.light.Light;
 import app.material.Material;
 import cgg_tools.Color;
