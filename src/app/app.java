@@ -12,6 +12,7 @@ import app.material.Material;
 import app.material.PhongMaterial;
 import app.sampler.CheckerboardSampler;
 import app.sampler.GridSampler;
+import app.sampler.Raytracer;
 import app.sampler.StratifiedSampler;
 import app.sampler.TransformSampler;
 import app.shape.BackgroundShape;

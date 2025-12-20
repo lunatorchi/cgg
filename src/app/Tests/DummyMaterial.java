@@ -1,8 +1,8 @@
 package app.tests;
 
 import app.Hit;
-import app.Raytracer;
 import app.material.Material;
+import app.sampler.Raytracer;
 import cgg_tools.Color;
 import cgg_tools.Vec3;
 
