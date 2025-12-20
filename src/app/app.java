@@ -10,6 +10,9 @@ import app.light.DirectionalLight;
 import app.light.Light;
 import app.material.Material;
 import app.material.PhongMaterial;
+import app.sampler.CheckerboardSampler;
+import app.sampler.GridSampler;
+import app.sampler.StratifiedSampler;
 import app.sampler.TransformSampler;
 import app.shape.BackgroundShape;
 import app.shape.GroupShape;
@@ -39,33 +42,38 @@ public class app {
     // Transform Matrix
     // Mat4x4 rotY = Mat4x4.rotate(0, 1, 0, 90);
     Mat4x4 rotX = Mat4x4.rotate(1, 0, 0, -15);
-    Mat4x4 move = Mat4x4.move(0, 1, 2);
+    Mat4x4 move = Mat4x4.move(0, 2, 4);
     Mat4x4 view = Mat4x4.multiply(move, rotX);
 
     // Creates a Camera now with view
     Camera cam = new Camera(alpha, width, height, view);
 
     // Textures
-    Sampler earthTexture = new ImageTexture("src/textures/earth-december.png");
-    Sampler grassTexture = new ImageTexture("src/textures/grass.jpg");
-    // MATERIAL
-    Material earthMaterial = new PhongMaterial(
-      earthTexture,
-      earthTexture,
+    Sampler checkerboard = new CheckerboardSampler(
+      80,
+      Color.white,
+      Color.black
+        
+    );
+
+    Sampler redATexture = new ImageTexture("src/textures/A_red.png");
+
+    // Material
+    Material checkerboardMaterial = new PhongMaterial(
+      checkerboard,
+      checkerboard,
+      new ConstantColor(Color.black),
+      10.0
+    );
+
+    Material sphereMaterial = new PhongMaterial(
+      redATexture,
+      redATexture,
       new ConstantColor(new Color(0.3, 0.3, 0.3)),
       20.0
     );
 
-    Mat4x4 grassScale = Mat4x4.scale(4, 4, 1);
-    Sampler grass = new TransformSampler(grassTexture, grassScale);
     
-    Material grassMaterial = new PhongMaterial(
-      grass,
-      grass,
-      new ConstantColor(Color.black),
-      1.0
-    );
-
     // BACKGROUND
     Material backgroundMaterial = new PhongMaterial(
       new ConstantColor(new Color(0.9, 0.95, 1.0)),
@@ -77,11 +85,10 @@ public class app {
     GroupShape scene = new GroupShape(
       Mat4x4.identity(),
       new GroupShape(
-        Mat4x4.rotate(0, 1, 0, -90), // earth rotated 90°
-        new SphereShape(new Vec3(0, 0.8, 0), 0.8, earthMaterial)
+        Mat4x4.rotate(0, 1, 0, -90),
+        new SphereShape(new Vec3(0, 0.8, 0), 0.8, sphereMaterial)
       ),
-      //new SphereShape(new Vec3(0, 0.8, 0), 0.8, earthMaterial),
-      new RectShape(new Vec3(0, -0.5, 0), 6.0, 6.0, grassMaterial),
+      new RectShape(new Vec3(0, 0, 0), 30.0, 30.0, checkerboardMaterial),
       new BackgroundShape(backgroundMaterial)
     );
 
@@ -105,7 +112,18 @@ public class app {
     Raytracer raytracer = new Raytracer(cam, sceneObj, background);
 
     image.sample(raytracer);
-    image.writePNG("a07-own-scene");
+    image.writePNG("a08-no-antialiasing");
+
+    //Grid Sampling
+    var gridSampler4 = new GridSampler(raytracer, 16, width, height);
+    image.sample(gridSampler4);
+    image.writePNG("a08-grid-16x16");
+
+    //Stratified Sampling
+    var stratSampler4 = new StratifiedSampler(raytracer, 16, width, height);
+    image.sample(stratSampler4);
+    image.writePNG("a08-stratified-16x16");
+
 
     // runs test method
     SphereTests.sphereTests();
