@@ -18,6 +18,7 @@ public class Raytracer implements Sampler {
     private Color background;
 
     private static final double epsilon = 1e-4; // to avoid shadow acne 
+    private static final int MAX_Depth = 5; // max recursive depth
 
     private static final boolean debug_Backside = true;
     private static final Color backside_color = Color.magenta;
@@ -28,15 +29,22 @@ public class Raytracer implements Sampler {
         this.background = background;
     }
 
+    public Color getColor(Vec2 samplePoint) {
+        // create ray starting at camera that passes through samplePoint
+        Ray ray = camera.generate_ray(samplePoint);
+        return getColor(ray, MAX_Depth);
+    }
+
     /**
      * Sets color in image to either backgroundcolor if ray hits nothing or the spheres color with shading if hit
      * @param samplePoint coordinates of pixel
      * @return color of the pixel
      */
-    public Color getColor(Vec2 samplePoint) {
+    public Color getColor(Ray ray, int depth) {
 
-        // create ray starting at camera that passes through samplePoint
-        Ray ray = camera.generate_ray(samplePoint);
+        if (depth == 0) {
+            return Color.black;
+        }
         Hit hit = scene.shapes().intersect(ray);
 
         if(hit != null) {
@@ -51,17 +59,46 @@ public class Raytracer implements Sampler {
             
             Material material = hit.material();
 
-            Color result = material.ambient(hit, scene.ambientLight());
+            Color result = Color.black;
 
-            for (Light light :scene.lights()){
-                if (visibleLight(hit, light)){
-                    
-                    Vec3 to_light = light.to_light(hit.point());
-                    Color incoming_light = light.color_at(hit.point());
+            // Ambient
+            if (material.does_ambient_lighting()) {
+                result = Color.add(result, material.ambient(hit, scene.ambientLight()));
+            }
 
-                    Color shade = material.shade(hit, to_viewer, to_light, incoming_light);
-                    result = Color.add(result, shade);
+            // Direct lighting
+            if (material.does_direct_lighting()) {
+                for (Light light : scene.lights()) {
+                    if (visibleLight(hit, light)) {
+                        Vec3 to_light = light.to_light(hit.point());
+                        Color incoming_light = light.color_at(hit.point());
+                        Color shade = material.shade(hit, to_viewer, to_light, incoming_light);
+                        result = Color.add(result, shade);
+                    }
                 }
+            }
+
+            // Emission
+            if (material.does_emission()) {
+                Color emission = material.emission(hit, to_viewer);
+                result = Color.add(result, emission);
+            }
+
+            // reflection
+            if (material.does_reflection()) {
+                // reflection direction
+                Vec3 reflection_direction = material.generate_reflection_direction(hit, to_viewer);
+                
+                // second ray to avoid shadow acne
+                Vec3 reflection_origin = Vec3.add(hit.point(), Vec3.multiply(epsilon, reflection_direction));
+                Ray reflection_ray = new Ray(reflection_origin, reflection_direction, 0, Double.POSITIVE_INFINITY);
+                
+                // calculate color from reflection direction 
+                Color incoming_light = getColor(reflection_ray, depth - 1);
+                
+                // shade() to calculate how much is reflected 
+                Color reflected = material.shade(hit, to_viewer, reflection_direction, incoming_light);
+                result = Color.add(result, reflected);
             }
             return result;
         }

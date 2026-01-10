@@ -8,7 +8,10 @@ import java.util.List;
 
 import app.light.DirectionalLight;
 import app.light.Light;
+import app.material.DiffuseEmitterMaterial;
+import app.material.DiffuseMaterial;
 import app.material.Material;
+import app.material.MirrorMaterial;
 import app.material.PhongMaterial;
 import app.sampler.CheckerboardSampler;
 import app.sampler.GridSampler;
@@ -34,22 +37,27 @@ public class app {
   }
 
   public static void main(String[] args) {
-    int width = 800;
-    int height = 600;
+    int width = 480;
+    int height = 270;
     double alpha = 70.0;
     Color background = new Color(0.7, 0.7, 0.7);
     var image = new Image(width, height);
 
     // Transform Matrix
     // Mat4x4 rotY = Mat4x4.rotate(0, 1, 0, 90);
-    Mat4x4 rotX = Mat4x4.rotate(1, 0, 0, -15);
-    Mat4x4 move = Mat4x4.move(0, 2, 4);
+    Mat4x4 rotX = Mat4x4.rotate(1, 0, 0, -10);
+    Mat4x4 move = Mat4x4.move(0, 1, -2);
     Mat4x4 view = Mat4x4.multiply(move, rotX);
 
     // Creates a Camera now with view
     Camera cam = new Camera(alpha, width, height, view);
 
     // Textures
+    // MATERIALIEN test scene
+    Material redDiffuse = new DiffuseMaterial(new Color(0.8, 0, 0));
+    Material greyDiffuse = new DiffuseMaterial(new Color(0.7, 0.7, 0.7));
+    Material backgroundEmitter = new DiffuseEmitterMaterial(Color.white);
+
     Sampler checkerboard = new CheckerboardSampler(
       80,
       Color.white,
@@ -57,24 +65,32 @@ public class app {
         
     );
 
-    Sampler redATexture = new ImageTexture("src/textures/A_red.png",true);
-
-    // Material
-    Material checkerboardMaterial = new PhongMaterial(
+    Material floorMaterial = new PhongMaterial(
       checkerboard,
       checkerboard,
       new ConstantColor(Color.black),
       10.0
     );
 
-    Material sphereMaterial = new PhongMaterial(
-      redATexture,
-      redATexture,
-      new ConstantColor(new Color(0.3, 0.3, 0.3)),
-      20.0
+    Material redMaterial = new PhongMaterial(
+      new ConstantColor(new Color(0.9, 0.1, 0.1)),
+      new ConstantColor(new Color(0.9, 0.1, 0.1)),
+      new ConstantColor(new Color(0.5, 0.5, 0.5)),
+      30.0
+    );
+    
+    Material blueMaterial = new PhongMaterial(
+      new ConstantColor(new Color(0.1, 0.1, 0.9)),
+      new ConstantColor(new Color(0.1, 0.1, 0.9)),
+      new ConstantColor(new Color(0.5, 0.5, 0.5)),
+      30.0
     );
 
-    
+  
+    Material mirrorMaterial = new MirrorMaterial(new Color(0.9, 0.9, 0.9));
+
+    Material mirrorMaterial2 = new MirrorMaterial();
+
     // BACKGROUND
     Material backgroundMaterial = new PhongMaterial(
       new ConstantColor(new Color(0.9, 0.95, 1.0)),
@@ -85,12 +101,9 @@ public class app {
 
     GroupShape scene = new GroupShape(
       Mat4x4.identity(),
-      new GroupShape(
-        Mat4x4.rotate(0, 1, 0, -90),
-        new SphereShape(new Vec3(0, 0.8, 0), 0.8, sphereMaterial)
-      ),
-      new RectShape(new Vec3(0, 0, 0), 30.0, 30.0, checkerboardMaterial),
-      new BackgroundShape(backgroundMaterial)
+      new SphereShape(new Vec3(0, 0.8, -4), 0.8, redDiffuse),
+      new RectShape(new Vec3(0, 0, 0), 30.0, 30.0, greyDiffuse),
+      new BackgroundShape(backgroundEmitter)
     );
 
     // LIGHTS
@@ -109,11 +122,11 @@ public class app {
     Color ambientLight = new Color(0.5, 0.5, 0.5);
     // Color ambientLight = new Color(0.6, 1.0, 1.0);
 
-    Scene sceneObj = new Scene(scene, List.of(light), ambientLight);
-    Raytracer raytracer = new Raytracer(cam, sceneObj, background);
+    Scene sceneObj = new Scene(scene, List.of(), Color.black);
+    Raytracer raytracer = new Raytracer(cam, sceneObj, Color.black);
 
-    image.sample(new StratifiedSampler(raytracer, 16, width, height));
-    image.writePNG("a08-gamma");
+    image.sample(new StratifiedSampler(raytracer, 2, width, height));
+    image.writePNG("a09-diffuse-test-scene");
 
    /*  //Grid Sampling
     var gridSampler4 = new GridSampler(raytracer, 16, width, height);

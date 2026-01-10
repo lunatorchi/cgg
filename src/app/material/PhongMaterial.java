@@ -33,6 +33,26 @@ public class PhongMaterial implements Material {
     
 
     @Override
+    public boolean does_ambient_lighting() {
+        return true;
+    }
+
+    @Override
+    public boolean does_direct_lighting() {
+        return true;
+    }
+
+   @Override
+    public boolean does_emission() {
+        return false;
+    }
+    
+    @Override
+    public boolean does_reflection() {
+        return false;
+    }
+    
+    @Override
     public Color ambient(Hit hit, Color ambientLight) {
         // Hadamard product
         return Color.multiply(k_ambient.getColor(hit.uv()), ambientLight);
